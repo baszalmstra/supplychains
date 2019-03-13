@@ -1,0 +1,8 @@
+[package]
+name = "supplychains"
+version = "0.1.0"
+authors = ["Bas Zalmstra <zalmstra.bas@gmail.com>", "Maarten Wiedenhof <maartenwiedenhof@gmail.com"]
+edition = "2018"
+
+[dependencies]
+glium = "0.23.0"
