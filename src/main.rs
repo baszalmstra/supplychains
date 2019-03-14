@@ -1,31 +1,40 @@
-use amethyst;
+#[macro_use]
+extern crate amethyst;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate serde;
 
 use amethyst::{
-    assets::HotReloadBundle,
+    assets::{HotReloadBundle, HotReloadStrategy, Loader, AssetStorage},
     assets::{PrefabLoader, PrefabLoaderSystem, RonFormat},
     controls::{ArcBallControlBundle, ArcBallControlTag, HideCursor},
-    core::transform::TransformBundle,
+    core::transform::{TransformBundle, Transform},
     input::is_key_down,
     input::InputBundle,
     prelude::*,
     renderer::{
-        DisplayConfig, DrawPbm, DrawShaded, DrawSkybox, Pipeline, PosNormTex, RenderBundle, Rgba,
-        SkyboxColor, Stage,
+        DisplayConfig, DrawPbm, DrawShaded, DrawSkybox, MeshBuilder, Pipeline, PosColor, PosTex,
+        PosNormTex, RenderBundle, Rgba, SkyboxColor, Stage, Mesh, Material, MeshData, DrawFlat,
+        MaterialDefaults, Texture
     },
-    utils::{application_root_dir, scene::BasicScenePrefab},
+    utils::application_root_dir,
     winit::VirtualKeyCode,
     LoggerConfig, StdoutLog,
 };
+
+mod auto_fov;
+mod scene;
+
+type ScenePrefab = scene::ScenePrefab<Vec<PosTex>>;
 
 struct Example;
 
 impl SimpleState for Example {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let prefab_handle = data.world.exec(
-            |loader: PrefabLoader<'_, BasicScenePrefab<Vec<PosNormTex>>>| {
-                loader.load("prefabs/arc_ball_camera.ron", RonFormat, (), ())
-            },
-        );
+        let prefab_handle = data.world.exec(|loader: PrefabLoader<'_, ScenePrefab>| {
+            loader.load("prefabs/arc_ball_camera.ron", RonFormat, (), ())
+        });
         data.world.create_entity().with(prefab_handle).build();
 
         *data.world.write_resource::<SkyboxColor>() = SkyboxColor {
@@ -33,7 +42,50 @@ impl SimpleState for Example {
             zenith: (0.03, 0.03, 0.03, 1.0).into(),
         };
 
-        data.world.write_resource::<HideCursor>().hide = false;
+        data.world.write_resource::<HideCursor>().hide = true;
+
+        let albedo = {
+            let loader = data.world.read_resource::<Loader>();
+            loader.load_from_data([1.0, 1.0, 1.0, 1.0].into(), (), &data.world.read_resource::<AssetStorage<Texture>>())
+        };
+
+        let mat_defaults = data.world.read_resource::<MaterialDefaults>().0.clone();
+
+        let mesh = {
+            let loader = data.world.read_resource::<Loader>();
+            let triangle = vec![
+                PosTex {
+                    position: [0.0, 40.0, 0.0].into(),
+                    tex_coord: [0.5, 0.0].into(),
+
+                },
+                PosTex {
+                    position: [10.0, 0.0, 10.0].into(),
+                    tex_coord: [0.0, 1.0].into(),
+                },
+                PosTex {
+                    position: [-10.0, 0.0, 0.0].into(),
+                    tex_coord: [1.0, 1.0].into(),
+                },
+            ];
+
+            loader.load_from_data(
+                MeshData::PosTex(triangle),
+                (),
+                &data.world.read_resource::<AssetStorage<Mesh>>())
+        };
+
+        let material = Material {
+            albedo,
+            ..mat_defaults.clone()
+        };
+
+        data.world
+            .create_entity()
+            .with(mesh)
+            .with( Transform::default() )
+            .with( material )
+            .build();
     }
 
     fn handle_event(
@@ -70,16 +122,14 @@ fn main() -> amethyst::Result<()> {
     let pipe = Pipeline::build().with_stage(
         Stage::with_backbuffer()
             .clear_target([0.02, 0.02, 0.02, 1.0], 1.0)
-            .with_pass(DrawShaded::<PosNormTex>::new())
+            .with_pass(DrawFlat::<PosTex>::new())
             .with_pass(DrawSkybox::new()),
     );
 
     let game_data = GameDataBuilder::default()
-        .with(
-            PrefabLoaderSystem::<BasicScenePrefab<Vec<PosNormTex>>>::default(),
-            "",
-            &[],
-        )
+        .with(PrefabLoaderSystem::<ScenePrefab>::default(), "prefab", &[])
+        .with(auto_fov::AutoFovSystem, "auto_fov", &["prefab"])
+        .with_bundle(HotReloadBundle::new(HotReloadStrategy::default()))?
         .with_bundle(TransformBundle::new().with_dep(&[]))?
         .with_bundle(
             InputBundle::<String, String>::new().with_bindings_from_file(&key_bindings_path)?,
