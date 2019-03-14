@@ -1,29 +1,51 @@
-pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+use amethyst;
 
-fn main() {
-    use glium::{glutin, Surface};
+use amethyst::{
+    input::is_key_down,
+    prelude::*,
+    renderer::{DisplayConfig, DrawFlat, Pipeline, PosNormTex, RenderBundle, Stage},
+    utils::application_root_dir,
+    winit::VirtualKeyCode,
+};
 
-    let mut events_loop = glutin::EventsLoop::new();
-    let window = glutin::WindowBuilder::new()
-        .with_title(format!("Supply Chains ({})", VERSION))
-        .with_dimensions((1280.0, 800.0).into());
-    let context = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
+struct Example;
 
-    let mut closed = false;
-    while !closed {
-        let mut target = display.draw();
-        target.clear_color(0.02, 0.02, 0.02, 1.0);
-        target.finish().unwrap();
-
-        events_loop.poll_events(|ev| {
-            match ev {
-                glutin::Event::WindowEvent { event, .. } => match event {
-                    glutin::WindowEvent::CloseRequested => closed = true,
-                    _ => (),
-                },
-                _ => (),
+impl SimpleState for Example {
+    fn handle_event(
+        &mut self,
+        _: StateData<'_, GameData<'_, '_>>,
+        event: StateEvent,
+    ) -> SimpleTrans {
+        if let StateEvent::Window(event) = event {
+            if is_key_down(&event, VirtualKeyCode::Escape) {
+                Trans::Quit
+            } else {
+                Trans::None
             }
-        });
+        } else {
+            Trans::None
+        }
     }
+}
+
+fn main() -> amethyst::Result<()> {
+    amethyst::start_logger(Default::default());
+
+    let app_root = application_root_dir();
+    let path = format!("{}/resources/display_config.ron", app_root);
+    let config = DisplayConfig::load(&path);
+
+    let pipe = Pipeline::build().with_stage(
+        Stage::with_backbuffer()
+            .clear_target([0.02, 0.02, 0.02, 1.0], 1.0)
+            .with_pass(DrawFlat::<PosNormTex>::new()),
+    );
+
+    let game_data =
+        GameDataBuilder::default().with_bundle(RenderBundle::new(pipe, Some(config)))?;
+    let mut game = Application::new("./", Example, game_data)?;
+
+    game.run();
+
+    Ok(())
 }

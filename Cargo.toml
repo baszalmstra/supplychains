@@ -5,4 +5,4 @@ authors = ["Bas Zalmstra <zalmstra.bas@gmail.com>", "Maarten Wiedenhof <maartenw
 edition = "2018"
 
 [dependencies]
-glium = "0.23.0"
+amethyst = "0.10.0"
