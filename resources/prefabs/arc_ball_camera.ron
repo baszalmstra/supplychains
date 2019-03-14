@@ -1,0 +1,64 @@
+#![enable(implicit_some)]
+Prefab (
+    entities: [
+        (
+            data: (
+                light: (ambient_color: ((0.1, 0.1, 0.1, 1.0))),
+            ),
+        ),
+        (
+            data: (
+                graphics: (
+                    mesh: Asset(File ("meshes/teapot.obj", ObjFormat, ())),
+                    material: (
+                        albedo: Data(Rgba((1.0, 0.0, 1.0, 1.0,), (channel: Srgb),)),
+                    ),
+                ),
+                transform: (
+                    translation: (-5.0, 0.0, -10.0),
+                ),
+            ),
+        ),
+        (
+            data: (
+                transform: (
+                    translation: (0.0, 2.0, 0.0),
+                    rotation: (0.0, 0.0, 1.0, 0.0),
+                ),
+                light: (
+                    ambient_color: (Rgba(0.01, 0.01, 0.01, 1.0)),
+                    light: Point((
+                        intensity: 3.0,
+                        color: (1.0, 1.0, 1.0, 1.0),
+                        radius: 5.0,
+                    )),
+                ),
+            ),
+        ),
+        (
+            data: (
+                graphics: (
+                    mesh: Asset(File ("meshes/cube.obj", ObjFormat, ())),
+                    material: (
+                        albedo: Data(Rgba((1.0, 1.0, 0.0, 1.0,), (channel: Srgb),)),
+                    ),
+                ),
+                transform: (
+                    translation: (0.0, 0.0, -5.0),
+                ),
+            ),
+        ),
+        (
+            data: (
+                transform: (),
+                camera: Perspective((
+                    aspect: 1,
+                    fovy: 1.0471975512,
+                    znear: 0.1,
+                    zfar: 2000.0,
+                )),
+                control_tag: (arc_ball: (1, 30.),),
+            ),
+        ),
+    ],
+)
