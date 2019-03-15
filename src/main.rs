@@ -1,29 +1,19 @@
-pub const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+#[macro_use]
+extern crate log;
+
+mod app;
+mod camera;
+mod states;
+mod timing;
+mod world;
 
 fn main() {
-    use glium::{glutin, Surface};
+    pretty_env_logger::init();
 
-    let mut events_loop = glutin::EventsLoop::new();
-    let window = glutin::WindowBuilder::new()
-        .with_title(format!("Supply Chains ({})", VERSION))
-        .with_dimensions((1280.0, 800.0).into());
-    let context = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
-
-    let mut closed = false;
-    while !closed {
-        let mut target = display.draw();
-        target.clear_color(0.02, 0.02, 0.02, 1.0);
-        target.finish().unwrap();
-
-        events_loop.poll_events(|ev| {
-            match ev {
-                glutin::Event::WindowEvent { event, .. } => match event {
-                    glutin::WindowEvent::CloseRequested => closed = true,
-                    _ => (),
-                },
-                _ => (),
-            }
-        });
-    }
+    app::Application::new(states::GameState)
+        .with_title("Supply Chains")
+        .with_dimensions((1280, 800).into())
+        .build()
+        .unwrap()
+        .run();
 }
