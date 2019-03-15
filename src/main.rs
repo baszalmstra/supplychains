@@ -25,6 +25,7 @@ use amethyst::{
 
 mod auto_fov;
 mod scene;
+mod world;
 
 type ScenePrefab = scene::ScenePrefab<Vec<PosTex>>;
 
@@ -52,25 +53,29 @@ impl SimpleState for Example {
         let mat_defaults = data.world.read_resource::<MaterialDefaults>().0.clone();
 
         let mesh = {
+            use world::voxel::Vertex;
             let loader = data.world.read_resource::<Loader>();
             let triangle = vec![
-                PosTex {
+                Vertex {
                     position: [0.0, 40.0, 0.0].into(),
+                    color: [1.0, 0.0, 0.0, 1.0].into(),
                     tex_coord: [0.5, 0.0].into(),
 
                 },
-                PosTex {
+                Vertex {
                     position: [10.0, 0.0, 10.0].into(),
+                    color: [0.0, 1.0, 0.0, 1.0].into(),
                     tex_coord: [0.0, 1.0].into(),
                 },
-                PosTex {
+                Vertex {
                     position: [-10.0, 0.0, 0.0].into(),
+                    color: [0.0, 0.0, 1.0, 1.0].into(),
                     tex_coord: [1.0, 1.0].into(),
                 },
             ];
 
             loader.load_from_data(
-                MeshData::PosTex(triangle),
+                MeshData::Creator(triangle),
                 (),
                 &data.world.read_resource::<AssetStorage<Mesh>>())
         };
@@ -122,7 +127,7 @@ fn main() -> amethyst::Result<()> {
     let pipe = Pipeline::build().with_stage(
         Stage::with_backbuffer()
             .clear_target([0.02, 0.02, 0.02, 1.0], 1.0)
-            .with_pass(DrawFlat::<PosTex>::new())
+            .with_pass(DrawFlat::<world::voxel::Vertex>::new())
             .with_pass(DrawSkybox::new()),
     );
 
