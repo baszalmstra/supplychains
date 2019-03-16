@@ -82,7 +82,8 @@ impl<S> ApplicationBuilder<S> {
         S: State + 'a,
     {
         let events_loop = glutin::EventsLoop::new();
-        let context = glutin::ContextBuilder::new();
+        let context = glutin::ContextBuilder::new()
+            .with_depth_buffer(24);
         let display = glium::Display::new(self.window, context, &events_loop)
             .map_err(|e| failure::err_msg(format!("Glium error: {0}", e.description())))?;
 
