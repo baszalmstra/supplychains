@@ -1,2 +1,2 @@
 pub mod voxel;
-pub mod map;
+pub mod chunk;

@@ -26,6 +26,7 @@ use amethyst::{
 mod auto_fov;
 mod scene;
 mod world;
+mod rotator;
 
 type ScenePrefab = scene::ScenePrefab<Vec<PosTex>>;
 
@@ -53,29 +54,13 @@ impl SimpleState for Example {
         let mat_defaults = data.world.read_resource::<MaterialDefaults>().0.clone();
 
         let mesh = {
-            use world::voxel::Vertex;
             let loader = data.world.read_resource::<Loader>();
-            let triangle = vec![
-                Vertex {
-                    position: [0.0, 40.0, 0.0].into(),
-                    color: [1.0, 0.0, 0.0, 1.0].into(),
-                    tex_coord: [0.5, 0.0].into(),
 
-                },
-                Vertex {
-                    position: [10.0, 0.0, 10.0].into(),
-                    color: [0.0, 1.0, 0.0, 1.0].into(),
-                    tex_coord: [0.0, 1.0].into(),
-                },
-                Vertex {
-                    position: [-10.0, 0.0, 0.0].into(),
-                    color: [0.0, 0.0, 1.0, 1.0].into(),
-                    tex_coord: [1.0, 1.0].into(),
-                },
-            ];
+
+            let chunk = world::chunk::ChunkData::default();
 
             loader.load_from_data(
-                MeshData::Creator(triangle),
+                MeshData::Creator(Box::new(chunk)),
                 (),
                 &data.world.read_resource::<AssetStorage<Mesh>>())
         };
@@ -127,13 +112,14 @@ fn main() -> amethyst::Result<()> {
     let pipe = Pipeline::build().with_stage(
         Stage::with_backbuffer()
             .clear_target([0.02, 0.02, 0.02, 1.0], 1.0)
-            .with_pass(DrawFlat::<world::voxel::Vertex>::new())
+            .with_pass(DrawFlat::<world::chunk::Vertex>::new())
             .with_pass(DrawSkybox::new()),
     );
 
     let game_data = GameDataBuilder::default()
         .with(PrefabLoaderSystem::<ScenePrefab>::default(), "prefab", &[])
         .with(auto_fov::AutoFovSystem, "auto_fov", &["prefab"])
+        .with( rotator::RotatorSystem, "rotator", &[])
         .with_bundle(HotReloadBundle::new(HotReloadStrategy::default()))?
         .with_bundle(TransformBundle::new().with_dep(&[]))?
         .with_bundle(
