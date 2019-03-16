@@ -41,7 +41,7 @@ impl State for GameState {
 
     fn update(&mut self, time:&Time) -> Trans {
         let mut view = (*self.camera.view()).clone();
-        view.rotation *= &UnitQuaternion::from_axis_angle(&Vector3::y_axis(), time.delta_seconds());
+        view.rotation *= &UnitQuaternion::from_axis_angle(&Vector3::y_axis(), time.delta_seconds()*0.3);
         self.camera.set_view(view);
         Trans::Continue
     }
@@ -52,6 +52,7 @@ impl State for GameState {
 
         // Clear the screen
         target.clear_color(0.01, 0.01, 0.01, 0.01);
+        target.clear_depth(1.0 );
 
         match &self.renderer {
             Some(renderer) => renderer.draw(
@@ -72,7 +73,7 @@ impl Default for GameState {
     fn default() -> Self {
         let mut camera = Camera::default();
         camera.set_view(Isometry3::look_at_rh(
-            &Vector3::new(0.0, 2.0, -2.0).into(),
+            &Vector3::new(0.0, 50.0, -50.0).into(),
             &Vector3::new(0.0, 0.0, 0.0).into(),
             &Vector3::new(0.0, 1.0, 0.0),
         ));

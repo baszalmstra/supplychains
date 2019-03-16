@@ -4,15 +4,18 @@ use glium::glutin::{self, dpi::LogicalSize};
 use glium::Surface;
 use std::error::Error;
 use std::time::{Duration, Instant};
+use specs::{DispatcherBuilder, World, Dispatcher};
 
 pub struct Application<'a> {
     events_loop: glutin::EventsLoop,
     display: glium::Display,
     state: Box<dyn State + 'a>,
+    world: World,
+    dispatcher: Dispatcher<'a, 'a>
 }
 
 impl<'a> Application<'a> {
-    pub fn new<S: State + 'a>(initial_state: S) -> ApplicationBuilder<S> {
+    pub fn new<S: State + 'a>(initial_state: S) -> ApplicationBuilder<'a, S> {
         ApplicationBuilder::new(initial_state)
     }
 
@@ -51,19 +54,23 @@ impl<'a> Application<'a> {
     }
 }
 
-pub struct ApplicationBuilder<S> {
+pub struct ApplicationBuilder<'a, S> {
     initial_state: S,
     window: glutin::WindowBuilder,
+    world: World,
+    dispatch_builder: DispatcherBuilder<'a, 'a>
 }
 
-impl<S> ApplicationBuilder<S> {
-    pub fn new(initial_state: S) -> ApplicationBuilder<S> {
+impl<'a, S> ApplicationBuilder<'a, S> {
+    pub fn new(initial_state: S) -> ApplicationBuilder<'a, S> {
         info!("Initializing Supply Chains...");
         info!("Version: {}", env!("CARGO_PKG_VERSION"));
 
         ApplicationBuilder {
             initial_state,
             window: glutin::WindowBuilder::new(),
+            world: World::new(),
+            dispatch_builder: DispatcherBuilder::new()
         }
     }
 
@@ -77,20 +84,25 @@ impl<S> ApplicationBuilder<S> {
         self
     }
 
-    pub fn build<'a>(self) -> Result<Application<'a>, failure::Error>
+    pub fn build(mut self) -> Result<Application<'a>, failure::Error>
     where
         S: State + 'a,
     {
         let events_loop = glutin::EventsLoop::new();
         let context = glutin::ContextBuilder::new()
             .with_depth_buffer(24);
-        let display = glium::Display::new(self.window, context, &events_loop)
+        let mut display = glium::Display::new(self.window, context, &events_loop)
             .map_err(|e| failure::err_msg(format!("Glium error: {0}", e.description())))?;
+
+        let mut dispatcher = self.dispatch_builder.build();
+        dispatcher.setup(&mut self.world.res);
 
         Ok(Application {
             events_loop,
             display,
             state: Box::new(self.initial_state),
+            world: self.world,
+            dispatcher
         })
     }
 }
