@@ -19,7 +19,7 @@ Prefab (
                     znear: 0.1,
                     zfar: 2000.0,
                 )),
-                control_tag: (arc_ball: (0, 30.),),
+                control_tag: (arc_ball: (0, 40.),),
                 auto_fov: ()
             ),
         )

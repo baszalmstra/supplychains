@@ -4,6 +4,8 @@ extern crate amethyst;
 extern crate log;
 #[macro_use]
 extern crate serde;
+#[macro_use]
+extern crate derivative;
 
 use amethyst::{
     assets::{HotReloadBundle, HotReloadStrategy, Loader, AssetStorage},
@@ -27,6 +29,7 @@ mod auto_fov;
 mod scene;
 mod world;
 mod rotator;
+mod renderer;
 
 type ScenePrefab = scene::ScenePrefab<Vec<PosTex>>;
 

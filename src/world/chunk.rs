@@ -45,21 +45,17 @@ impl MeshCreator for ChunkData {
     fn build(self: Box<ChunkData>, renderer: &mut Renderer) -> amethyst::renderer::error::Result<Mesh> {
         let triangle = vec![
             Vertex {
-                position: [0.0, 40.0, 0.0].into(),
-                color: [1.0, 0.0, 0.0, 1.0].into(),
-                tex_coord: [0.5, 0.0].into(),
-
-            },
-            Vertex {
-                position: [10.0, 0.0, 10.0].into(),
-                color: [0.0, 1.0, 0.0, 1.0].into(),
-                tex_coord: [0.0, 1.0].into(),
-            },
-            Vertex {
-                position: [-10.0, 0.0, 0.0].into(),
+                position: [0.0, 0.0, 1.0].into(),
                 color: [0.0, 0.0, 1.0, 1.0].into(),
-                tex_coord: [1.0, 1.0].into(),
             },
+            Vertex {
+                position: [1.0, 0.0, 0.0].into(),
+                color: [1.0, 0.0, 0.0, 1.0].into(),
+            },
+            Vertex {
+                position: [1.0, 0.0, 1.0].into(),
+                color: [0.0, 1.0, 0.0, 1.0].into(),
+            }
         ];
 
         MeshBuilder::new(triangle).build(&mut renderer.factory)
@@ -97,8 +93,6 @@ pub struct Vertex {
     pub position: Vector3<f32>,
     /// RGBA color value of the vertex.
     pub color: [f32; 4],
-    /// UV texture coordinates used by the vertex.
-    pub tex_coord: Vector2<f32>,
 }
 
 unsafe impl Pod for Vertex {}

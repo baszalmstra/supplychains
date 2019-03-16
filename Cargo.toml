@@ -12,3 +12,5 @@ serde_derive = "1.0"
 gfx = "0.17.1"
 gfx_core = "0.8.3"
 nalgebra="0.17.2"
+derivative="1.0.2"
+glsl-layout = { version = "0.1.1", features = ["gfx"] }
