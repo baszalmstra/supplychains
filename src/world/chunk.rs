@@ -1,7 +1,8 @@
 use crate::world::Voxel;
+use noise::{Value, NoiseFn};
 
-pub const CHUNK_WIDTH: usize = 32;
-pub const CHUNK_HEIGHT: usize = 32;
+pub const CHUNK_WIDTH: usize = 16;
+pub const CHUNK_HEIGHT: usize = 16;
 pub const CHUNK_LAYERS: usize = 32;
 
 pub struct Chunk {
@@ -10,25 +11,21 @@ pub struct Chunk {
 
 impl Default for Chunk {
     fn default() -> Self {
+        let mut noise = noise::Value::new();
+
         let mut result = Chunk {
             voxels: [[[Default::default(); CHUNK_HEIGHT]; CHUNK_WIDTH]; CHUNK_LAYERS],
         };
 
         for x in 0..CHUNK_WIDTH {
             for z in 0..CHUNK_HEIGHT {
-                result.voxels[0][x][z] = Voxel::Grass;
+                result.voxels[0][x][z] = Voxel::Grass { shade: (noise.get([x as f64,0. ,z as f64]) * 255.0) as u8};
             }
         }
 
-        for x in 16..CHUNK_WIDTH-8 {
-            for z in 16..CHUNK_HEIGHT-8 {
-                result.voxels[1][x][z] = Voxel::Grass;
-            }
-        }
-
-        for x in 20..CHUNK_WIDTH-8 {
-            for z in 20..CHUNK_HEIGHT-8 {
-                result.voxels[2][x][z] = Voxel::Grass;
+        for x in 3..CHUNK_WIDTH-8 {
+            for z in 3..CHUNK_HEIGHT-8 {
+                result.voxels[1][x][z] = Voxel::Grass { shade: (noise.get([x as f64,0. ,z as f64]) * 255.0) as u8};
             }
         }
 

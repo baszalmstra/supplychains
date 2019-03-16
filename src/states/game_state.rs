@@ -73,7 +73,7 @@ impl Default for GameState {
     fn default() -> Self {
         let mut camera = Camera::default();
         camera.set_view(Isometry3::look_at_rh(
-            &Vector3::new(0.0, 50.0, -50.0).into(),
+            &Vector3::new(0.0, 30.0, -30.0).into(),
             &Vector3::new(0.0, 0.0, 0.0).into(),
             &Vector3::new(0.0, 1.0, 0.0),
         ));
