@@ -4,8 +4,8 @@ use crate::camera::Camera;
 use crate::world::voxel::{VoxelAdjacency, Voxel, VoxelFace, VOXEL_SIZE};
 use glium::{DrawParameters, Depth};
 use std::{mem, ptr};
-use nalgebra::{Vector4, Vector3};
-use nalgebra::geometry::Isometry3;
+use nalgebra::{Vector4, Vector3, Matrix4};
+use nalgebra::geometry::{Isometry3, Translation3};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
@@ -18,7 +18,8 @@ implement_vertex!(Vertex, position, color, normal);
 
 pub struct Mesh {
     vertex_buffer: glium::VertexBuffer<Vertex>,
-    index_buffer: glium::IndexBuffer<u16>
+    index_buffer: glium::IndexBuffer<u16>,
+    model: Matrix4<f32>
 }
 
 impl Mesh {
@@ -64,6 +65,7 @@ impl Mesh {
         Ok(Mesh {
             vertex_buffer,
             index_buffer,
+            model: Translation3::new(data.position[0] as f32, 0., data.position[1] as f32).into()
         })
     }
 }
@@ -209,15 +211,7 @@ impl Renderer {
 
         let proj_mat:[[f32;4];4] = camera.get_perspective(1280.0/800.0).into();
         let view_mat:[[f32;4];4] = camera.view_matrix().into();
-        let model_mat:[[f32;4];4] = model.into();
         let light_color_vec:[f32;3] = light_color.into();
-
-        let uniforms = uniform! {
-            projection: proj_mat,
-            view: view_mat,
-            model: model_mat,
-            light_color: light_color_vec
-        };
 
         let draw_parameters = DrawParameters {
             depth: Depth {
@@ -229,6 +223,16 @@ impl Renderer {
         };
 
         for chunk in iter {
+
+            let model_mat:[[f32;4];4] = chunk.model.into();
+
+            let uniforms = uniform! {
+                projection: proj_mat,
+                view: view_mat,
+                model: model_mat,
+                light_color: light_color_vec
+            };
+
             surface.draw(
                 &chunk.vertex_buffer,
                 &chunk.index_buffer,
