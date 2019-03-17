@@ -65,7 +65,7 @@ impl Mesh {
         Ok(Mesh {
             vertex_buffer,
             index_buffer,
-            model: Translation3::new(data.position[0] as f32, 0., data.position[1] as f32).into()
+            model: Translation3::new(data.position[0] as f32, -30., data.position[1] as f32).into()
         })
     }
 }

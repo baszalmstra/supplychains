@@ -1,9 +1,9 @@
-pub const VOXEL_SIZE:(f32,f32,f32) = (2., 2., 2.);
+pub const VOXEL_SIZE:(f32,f32,f32) = (1., 1., 1.);
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub enum Voxel {
     Air,
-    Grass { shade: u8 },
+    Grass{ shade: u8 },
 }
 
 impl Default for Voxel {
@@ -34,7 +34,7 @@ impl Voxel {
 
     pub fn shade(&self) -> f32 {
         match *self {
-            Voxel::Grass { shade} => shade as f32 / 255.0,
+            Voxel::Grass {shade} => shade as f32 / 255.0,
             _ => 1.0
         }
     }

@@ -1,4 +1,4 @@
-mod chunk;
+pub mod chunk;
 mod voxel;
 pub mod renderer;
 

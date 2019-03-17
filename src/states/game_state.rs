@@ -22,7 +22,13 @@ impl State for GameState {
     fn on_start(&mut self, display: &glium::Display) {
         self.renderer = Some(chunk::Renderer::new(display).unwrap());
 
-        self.meshes.push(chunk::Mesh::from_data(display, world::Chunk::generate([0,0], 42)).unwrap());
+        for x in -5..5 {
+            for y in -5..5 {
+                self.meshes.push(chunk::Mesh::from_data(
+                    display,
+                    world::Chunk::generate([x*(world::chunk::CHUNK_WIDTH) as i64, y*(world::chunk::CHUNK_HEIGHT) as i64], 1231251)).unwrap());
+            }
+        }
     }
 
     fn handle_event(&mut self, event: Event) -> Trans {
