@@ -7,11 +7,13 @@ public class CameraControl : MonoBehaviour
 {
     public GameObject Target;
     
-    public float MinDistance = 1.0f;
-    public float MaxDistance = 30.0f;
+    public float MinDistance = 10.0f;
+    public float MaxDistance = 60.0f;
+    public float MinAngle = 40.0f;
+    public float MaxAngle = 60.0f;
     [RangeAttribute(0.0f, 1.0f)]
     public float Zoom = 0.5f;
-    public float Rotation = 0.0f;
+    public float Rotation = 30.0f;
 
     public float CurrentDistance 
     {
@@ -23,9 +25,12 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
-        float minAngle = 20;
-        float maxAngle = 80;
-        float angle = minAngle + (maxAngle-minAngle)*Zoom;
+        Apply();
+    }
+
+    public void Apply()
+    {
+        float angle = Mathf.Lerp(MinAngle, MaxAngle, Zoom);
 
         Quaternion orientation = Quaternion.Euler(angle, Rotation, 0);
         transform.rotation = orientation;

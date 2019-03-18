@@ -7,14 +7,14 @@ using static Easing;
 public class CameraInput : MonoBehaviour
 {
     private CameraControl control;
-    private Camera camera;
+    private new Camera camera;
 
     public float PanSpeed = 800.0f;
     public float PanDrag  = 15.0f;
     public float MousePanSpeed = 30.0f;
     public float MousePanDrag = 0.8f;
     
-    public float ZoomSpeed = 0.15f;
+    public float ZoomSpeed = 0.13f;
     public float ZoomDrag = 10.0f;
 
     public float RotationSpeed = 0.23f;
@@ -46,15 +46,29 @@ public class CameraInput : MonoBehaviour
         UpdateFromInput();
         DragWithMouse();
         RotateWithMouse();
+        UpdateZoom();
+    }
+
+    void UpdateZoom()
+    {
+        float zoom = dragMouseButtonDown ? 0.0f : Input.GetAxis("Zoom");
+        zoomVelocity = Mathf.Min(MaxZoomSpeed, zoomVelocity + zoom * ZoomSpeed);
+        if(zoomVelocity > 0.0f || zoomVelocity < 0.0f)
+        {
+            control.Apply();
+            Vector2 beforeZoomGroundPos = ComputeMouseGroundPosition();
+            control.Zoom = Mathf.Clamp01(control.Zoom + zoomVelocity);
+            control.Apply();
+            Vector2 afterZoomGroundPos = ComputeMouseGroundPosition();
+            Vector2 delta = afterZoomGroundPos - beforeZoomGroundPos;
+            control.Target.transform.position -= new Vector3(delta.x, 0.0f, delta.y);
+
+            zoomVelocity = zoomVelocity * Mathf.Max(0, 1.0f - ZoomDrag*Time.deltaTime);
+        }
     }
 
     void UpdateFromInput()
     {
-        float zoom = Input.GetAxis("Zoom");
-        zoomVelocity = Mathf.Min(MaxZoomSpeed, zoomVelocity + zoom * ZoomSpeed);
-        control.Zoom = Mathf.Clamp01(control.Zoom + zoomVelocity);
-        zoomVelocity = zoomVelocity * Mathf.Max(0, 1.0f - ZoomDrag*Time.deltaTime);
-
         // Enable rotation using rotation keys but only in angles of 90
         float rotationAngle = 0.0f;
         if(Input.GetButtonDown("RotateLeft"))
@@ -98,16 +112,27 @@ public class CameraInput : MonoBehaviour
         {
             rotateMouseButtonDown = true;
             rotateMouseDownPosition = Input.mousePosition;
+            zoomVelocity = 0.0f;
         }
         else if (Input.GetMouseButtonUp(2))
         {
             rotateMouseButtonDown = false;
+            zoomVelocity = 0.0f;
         }
         else if (rotateMouseButtonDown)
         {
-            control.Rotation += (rotateMouseDownPosition.x - Input.mousePosition.x) * RotationSpeed;
+            control.Rotation += (Input.mousePosition.x - rotateMouseDownPosition.x) * RotationSpeed;
             rotateMouseDownPosition = Input.mousePosition;
         }
+    }
+
+    Vector2 ComputeMouseGroundPosition()
+    {
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        float distance = ray.origin.y/ray.direction.y;
+        return new Vector2(
+            ray.origin.x - ray.direction.x*distance,
+            ray.origin.z - ray.direction.z*distance);
     }
 
     /// <summary>
@@ -115,17 +140,13 @@ public class CameraInput : MonoBehaviour
     /// </summary>
     void DragWithMouse()
     {
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-        float distance = ray.origin.y/ray.direction.y;
-        Vector2 groundPos = new Vector2(
-            ray.origin.x - ray.direction.x*distance,
-            ray.origin.z - ray.direction.z*distance);
+        Vector2 groundPos = ComputeMouseGroundPosition();   
 
         if (Input.GetMouseButtonDown(1))
         {
             dragMouseButtonDown = true;
             dragMouseDownPos = groundPos;
-            
+            zoomVelocity = 0.0f;
         }
         else if (Input.GetMouseButtonUp(1))
         {
