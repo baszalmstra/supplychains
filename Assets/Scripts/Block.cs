@@ -11,10 +11,10 @@ public enum Block : ushort
 
     // Represents whatever is at the lowers of the lowest level. This is a non-transparent block so 
     // that the bottom of chunks is not visible.
-    BedRock = 0x0003,
+    BedRock = 0x0002,
 
     // First usable block type
-    Grass   = 0x0002,
+    Grass   = 0x0003,
 }
 
 public static class BlockExtensions
@@ -22,5 +22,10 @@ public static class BlockExtensions
     public static bool IsTransparent(this Block block)
     {
         return block <= Block.Air;
+    }
+
+    public static float GetLightTransparency(this Block block)
+    {
+        return block >= Block.BedRock ? 0.0f : 1.0f;
     }
 }

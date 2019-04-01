@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 /// <summary>
 /// A utility class to be able to query and modify individual blocks instead of chunks.
 /// </summary>
+[Serializable]
 public class WorldBlocks
 {
     public World World { get; private set; }

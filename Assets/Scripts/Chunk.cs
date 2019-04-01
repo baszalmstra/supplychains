@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class Chunk
 {
     protected readonly Block[,,] blocks = new Block[Constants.ChunkSize,Constants.ChunkLayers,Constants.ChunkSize];
@@ -12,6 +14,10 @@ public class Chunk
     {
         World = world;
         Position = position;
+        for(int x = 0; x < Constants.ChunkSize; ++x)
+            for(int y = 0; y < Constants.ChunkLayers; ++y)
+                for(int z = 0; z < Constants.ChunkSize; ++z)
+                    blocks[x,y,z] = Block.Air;
     }
 
     /// <summary>
@@ -62,6 +68,11 @@ public class Chunk
         return blockPos.ContainingChunkCoordinates() == Position;
     }
 
+    /// <summary>
+    /// Sets a block to a specific type.
+    /// </summary>
+    /// <param name="blockPos"></param>
+    /// <param name="block"></param>
     public void Set(BlockPos blockPos, Block block)
     {
         if(InRange(blockPos))

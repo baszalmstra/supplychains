@@ -3,10 +3,10 @@ using System.Collections;
 
 public enum BlockFace : byte
 {
-    North,
-    East,
-    South,
-    West,
-    Up,
-    Down,
+    North = 0,
+    East = 1,
+    South = 2,
+    West = 3,
+    Up = 4,
+    Down = 5,
 }

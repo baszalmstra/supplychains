@@ -6,6 +6,7 @@ using System;
 /// <summary>
 /// Maintains the chunks data for an entire world.
 /// </summary>
+[Serializable]
 public class WorldChunks
 {
     private readonly Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();

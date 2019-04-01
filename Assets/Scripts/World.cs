@@ -5,30 +5,32 @@ public class World : MonoBehaviour
 {
     public WorldBlocks Blocks { get; private set; }
     public WorldChunks Chunks { get; private set; }
+    public WorldGenerator Generator { get; private set; }
 
     public World()
     {
         Blocks = new WorldBlocks(this);
         Chunks = new WorldChunks(this);
+        Generator = new WorldGenerator();
     }
 
     public Material ChunkMaterial;
 
     public void Start()
     {
-        for(int cx = -10; cx < 10; ++cx)
-            for(int cy = -10; cy < 10; ++cy)
+        int size = 10;
+        for(int cx = -size; cx < size; ++cx)
+            for(int cy = -size; cy < size; ++cy)
             {
-                Chunk chunk = new Chunk(this, new BlockPos(cx*Constants.ChunkSize, 0, cy*Constants.ChunkSize));
-                for(int x = 0; x < Constants.ChunkSize; ++x)
-                    for(int z = 0; z < Constants.ChunkSize; ++z)
-                        chunk.Set(new BlockPos(x,0,z)+chunk.Position, Block.Grass);
-
-                for(int x = 7; x < 12; ++x)
-                    for(int z = 6; z < 11; ++z)
-                        chunk.Set(new BlockPos(x,1,z)+chunk.Position, Block.Grass);
-
+                var pos = new BlockPos(cx*Constants.ChunkSize, 0, cy*Constants.ChunkSize);
+                Chunk chunk = Generator.Generate(this, pos);
                 Chunks.Set(chunk.Position, chunk);
+            }
+
+        for(int cx = -size; cx < size; ++cx)
+            for(int cy = -size; cy < size; ++cy)
+            {
+                var chunk = Chunks.Get(new BlockPos(cx*Constants.ChunkSize, 0, cy*Constants.ChunkSize));
                 SpawnChunkGameObject(chunk);
             }
     }
