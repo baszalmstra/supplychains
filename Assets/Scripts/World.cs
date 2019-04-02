@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
@@ -7,18 +8,21 @@ public class World : MonoBehaviour
     public WorldChunks Chunks { get; private set; }
     public WorldGenerator Generator { get; private set; }
 
+    private Dictionary<BlockPos, GameObject> chunkObjects;
+
     public World()
     {
         Blocks = new WorldBlocks(this);
         Chunks = new WorldChunks(this);
         Generator = new WorldGenerator();
+        chunkObjects = new Dictionary<BlockPos, GameObject>();
     }
 
     public Material ChunkMaterial;
 
     public void Start()
     {
-        int size = 10;
+        int size = 20;
         for(int cx = -size; cx < size; ++cx)
             for(int cy = -size; cy < size; ++cy)
             {
@@ -27,11 +31,18 @@ public class World : MonoBehaviour
                 Chunks.Set(chunk.Position, chunk);
             }
 
+        SpawnChunks();
+    }
+
+    void SpawnChunks()
+    {
+        int size = 20;
         for(int cx = -size; cx < size; ++cx)
             for(int cy = -size; cy < size; ++cy)
             {
                 var chunk = Chunks.Get(new BlockPos(cx*Constants.ChunkSize, 0, cy*Constants.ChunkSize));
-                SpawnChunkGameObject(chunk);
+                if(chunk != null) 
+                    SpawnChunkGameObject(chunk);
             }
     }
     
@@ -46,6 +57,9 @@ public class World : MonoBehaviour
             chunk.Position.y * Constants.BlockSize.y,
             chunk.Position.z * Constants.BlockSize.z);
         obj.transform.SetParent(this.transform);
+
+        chunkObjects.Add(chunk.Position, obj);
+
         return obj;
     }
 }

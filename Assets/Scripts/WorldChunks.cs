@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+[Serializable]
+public class ChunkLookup : Dictionary<BlockPos, Chunk> { }
+
 /// <summary>
 /// Maintains the chunks data for an entire world.
 /// </summary>
 [Serializable]
 public class WorldChunks
 {
-    private readonly Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
+    [SerializeField] private readonly ChunkLookup chunks = new ChunkLookup();
 
     public World World { get; private set; }
 

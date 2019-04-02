@@ -19,7 +19,11 @@ public class WorldGenerator
             {
                 int globalX = x + chunkPos.x;
                 int globalZ = z + chunkPos.z;
-                int height = (int)Mathf.Max(1, Mathf.Round(Mathf.Pow(Mathf.PerlinNoise((globalX+2238746)*0.02f, (globalZ+6879346)*0.02f), 3) * 0.7f * Constants.ChunkLayers));
+
+                float mountains = Mathf.Pow(Mathf.PerlinNoise((globalX+2238746)*0.02f, (globalZ+6879346)*0.02f), 1.5f);
+                float steepness = Mathf.SmoothStep(0.0f, 1.0f, Mathf.PerlinNoise((globalX+78952)*0.002f, (globalZ+2957112)*0.002f));
+
+                int height = (int)Mathf.Max(1, Mathf.Round(mountains * steepness * Constants.ChunkLayers));
                 
                 // Add blocks until the height was reached
                 for(int y = 0; y < height; ++y)
